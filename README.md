@@ -1,0 +1,2 @@
+# SnCT
+ SNES Configuration Tool
