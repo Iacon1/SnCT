@@ -4,7 +4,7 @@
 // https://sneslab.net/wiki/SNES_ROM_Header
 // Cartridge types and such not exclusive, just common ones right now
 
-package Files;
+package Segments;
 
 import java.util.List;
 
@@ -182,6 +182,17 @@ public class Header implements Segment
 	}
 	
 	@Override
+	public int getOffset() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void setOffset(int offset) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public int size()
 	{
 		return 47;
@@ -198,46 +209,46 @@ public class Header implements Segment
 	{
 		return "ROM Header";
 	}
-	
-	@Override
-	public String asText() 
+
+	public String buildAssembly() 
 	{
 		byte expansionRAMSize = 0x00; // TODO this changes when some expansion chips are involved
 		
-		String text = ".segment \"" + getTitle() + "\" ; " + getSummary() + "\n";
+		String text = null;
 		
-		// $00:FFB0-$00:FFB1 Maker Code
-		text = text + ".ascii \"" + new String(makerCode) + "\" ; Maker Code \n";
-		// $00:FFB2-$00:FFB5 Game Code
-		text = text + ".ascii \"" + new String(gameCode) + "\" ; Game Code \n";
-		// $00:FFB6-$00:FFBC Fixed Value (0x00)
-		text = text + ".byte $00, $00, $00, $00, $00, $00, $00 ; Fixed Value \n";
-		// $00:FFBD-$00:FFBD Expansion RAM Size
-		text = text + ".byte $" + MiscUtils.asHex(expansionRAMSize) + " ; Expansion RAM Size \n";
-		// $00:FFBE-$00:FFBE Special Version
-		text = text + ".byte $" + MiscUtils.asHex(specialVersion) + " ; Special Version \n";
-		// $00:FFBF-$00:FFBF Cartridge Type (Sub-number)
-		text = text + ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type subnumber \n"; // TODO not documented???
-		// $00:FFC0-$00:FFD4 Game Title Registration
-		text = text + ".ascii \"" + new String(gameTitle) + "\" ; Game Title \n"; // TODO JIS X 0201 support
-		// $00:FFD5-$00:FFD5 Map Mode
-		text = text + ".byte $" + MiscUtils.asHex(mapMode.getCode()) + " ; Map Mode \n";
-		// $00:FFD6-$00:FFD6 Cartridge Type
-		text = text + ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type \n";
-		// $00:FFD7-$00:FFD7 ROM Size
-		text = text + ".byte $" + MiscUtils.asHex(ROMSize) + " ; ROM Size \n";
-		// $00:FFD8-$00:FFD8 RAM Size
-		text = text + ".byte $" + MiscUtils.asHex(RAMSize) + " ; RAM Size \n";
-		// $00:FFD9-$00:FFD9 Destination Code
-		text = text + ".byte $" + MiscUtils.asHex(destination.getCode()) + " ; Destination Code \n";
-		// $00:FFDA-$00:FFDA Fixed Value (0x33)
-		text = text + ".byte $33 ; Fixed Value \n";
-		// $00:FFDB-$00:FFDB Mask ROM Version
-		text = text + ".byte $" + MiscUtils.asHex(revision) + " ; Revision \n";
-		// $00:FFDC-$00:FFDD Complement Check
-		text = text + ".byte $" + MiscUtils.asHex((byte) ~checksum[0]) + ", $" + MiscUtils.asHex((byte) ~checksum[1]) + " ; Complement Check \n";
-		// $00:FFDE-$00:FFDF Checksum
-		text = text + ".byte $" + MiscUtils.asHex((byte) checksum[0]) + ", $" + MiscUtils.asHex((byte) checksum[1]) + " ; Checksum \n";
+		
+		text = ""
+				+ ".segment \"" + getTitle() + "\" ; " + getSummary() + "\n"
+				+ ".ascii \"" + new String(makerCode) + "\" ; Maker Code \n" // $00:FFB0-$00:FFB1 Maker Code
+				+ ".ascii \"" + new String(gameCode) +  "\" ; Game Code \n" // $00:FFB2-$00:FFB5 Game Code
+				+ ".byte $00, $00, $00, $00, $00, $00, $00 ; Fixed Value \n" // $00:FFB6-$00:FFBC Fixed Value (0x00)
+				+ ".byte $" + MiscUtils.asHex(expansionRAMSize) + " ; Expansion RAM Size \n" // $00:FFBD-$00:FFBD Expansion RAM Size
+				+ ".byte $" + MiscUtils.asHex(specialVersion) + " ; Special Version \n" // $00:FFBE-$00:FFBE Special Version
+				+ ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type subnumber \n" // $00:FFBF-$00:FFBF Cartridge Type (Sub-number) TODO not documented???
+				+ ".ascii \"" + new String(gameTitle) + "\" ; Game Title \n" // $00:FFC0-$00:FFD4 Game Title Registration TODO JIS X 0201 support
+				+ ".byte $" + MiscUtils.asHex(mapMode.getCode()) + " ; Map Mode \n" // $00:FFD5-$00:FFD5 Map Mode
+				+ ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type \n" // $00:FFD6-$00:FFD6 Cartridge Type
+				+ ".byte $" + MiscUtils.asHex(ROMSize) + " ; ROM Size \n" // $00:FFD7-$00:FFD7 ROM Size
+				+ ".byte $" + MiscUtils.asHex(RAMSize) + " ; RAM Size \n" // $00:FFD8-$00:FFD8 RAM Size
+				+ ".byte $" + MiscUtils.asHex(destination.getCode()) + " ; Destination Code \n" // $00:FFD9-$00:FFD9 Destination Code
+				+ ".byte $33 ; Fixed Value \n" // $00:FFDA-$00:FFDA Fixed Value (0x33)
+				+ ".byte $" + MiscUtils.asHex(revision) + " ; Revision \n" // $00:FFDB-$00:FFDB Mask ROM Version
+				+ ".byte $" + MiscUtils.asHex((byte) ~checksum[0]) + ", $" + MiscUtils.asHex((byte) ~checksum[1]) + " ; Complement Check \n" // $00:FFDC-$00:FFDD Complement Check
+				+ ".byte $" + MiscUtils.asHex((byte) checksum[0]) + ", $" + MiscUtils.asHex((byte) checksum[1]) + " ; Checksum \n" // $00:FFDE-$00:FFDF Checksum
+				;
+		
+		return text;
+	}
+	
+	@Override
+	public String buildConfig()
+	{
+		String text = null;
+		
+		text = ""
+				+ "  " + getTitle() + ": \n"
+				+ "    load = ROM \n"
+				+ "    start = $FFB0; \n";
 		
 		return text;
 	}

@@ -1,17 +1,21 @@
 // By Iacon1
-// Created 31/22/2021
+// Created 10/22/2021
 // A chunk of bytes that can be moved around by the user.
 
-package Files;
+package Segments;
 
 public interface Segment
 {
+	// Gets offset
+	public int getOffset();
+	// Sets offset
+	public void setOffset(int offset);
 	/** Returns the estimated size of the chunk 
 	 * in bytes once compiled.
 	 * 
 	 * @return estimated size in bytes once compiled.
 	 */
-	public int size(); // Size in bytes
+	public int size();
 	
 	/** Returns the title of the segment
 	 * 
@@ -23,10 +27,8 @@ public interface Segment
 	 * @return summary as a string.
 	 */
 	public String getSummary();
-	
-	/** Returns the assembly code associated with the chunk.
+	/** Returns the config for this
 	 * 
-	 * @return code
 	 */
-	public String asText();
+	public String buildConfig();
 }

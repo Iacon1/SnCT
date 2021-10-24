@@ -136,9 +136,14 @@ public final class MiscUtils
 		return Math.max(x, y);
 	}
 	
+	public static String asHex(byte number, int digits)
+	{
+		return String.format("%0" + digits + "x", number);
+	}
+	
 	public static String asHex(byte number)
 	{
-		return String.format("%02x", number);
+		return asHex(number, 2);
 	}
 	
 	public static double logBase(double a, double b)

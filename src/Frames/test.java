@@ -1,6 +1,6 @@
 package Frames;
 
-import Files.Header;
+import Segments.Header;
 import Utils.DebugLogger;
 import Utils.Logging;
 
@@ -16,7 +16,8 @@ public class test {
 		header.setGameTitle("Test Test");
 		header.setROMSize(1024);
 		header.setRAMSize(2050);
-		Logging.logRaw("Test", "\n" + header.asText());
+		Logging.logRaw("Test", "\n" + header.buildAssembly());
+		Logging.logRaw("Test", "\n" + header.buildConfig());
 	}
 
 }
