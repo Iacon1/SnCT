@@ -7,6 +7,7 @@ package Utils;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("serial")
 public class GappyArrayList<E> extends ArrayList<E>
 {
 	/** Removes an element and does *not* shift,

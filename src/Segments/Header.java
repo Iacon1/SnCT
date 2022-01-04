@@ -6,11 +6,15 @@
 
 package Segments;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.util.List;
 
+import Utils.Editable;
+import Utils.EditorPanel;
 import Utils.MiscUtils;
 
-public class Header implements Segment
+public class Header implements Segment, Editable
 {
 	public enum CartridgeType
 	{
@@ -45,7 +49,6 @@ public class Header implements Segment
 			this.name = name;
 		}
 	}
-	
 	public enum MapMode
 	{
 		loRom(0x20, "LoROM"),
@@ -80,7 +83,6 @@ public class Header implements Segment
 			this.name = name;
 		}
 	}
-
 	public enum Destination
 	{
 		japan(0x00, "Japan"),
@@ -110,6 +112,7 @@ public class Header implements Segment
 			this.name = name;
 		}
 	}
+
 	private char[] makerCode = new char[2];
 	private char[] gameCode = new char[4];
 	private byte specialVersion = 0x00;
@@ -251,6 +254,43 @@ public class Header implements Segment
 				+ "    start = $FFB0; \n";
 		
 		return text;
+	}
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public EditorPanel editorPanel()
+	{
+		EditorPanel panel = new EditorPanel("Header Editor");
+		// Maker code
+		panel.addTextbox("Maker code", 2, (value) -> {setMakerCode(value);});
+		// Game code
+		panel.addTextbox("Game code", 4, (value) -> {setGameCode(value);});
+		// Special version
+		panel.addSpinner("Special version", 0, 0, 256, (value) -> {setSpecialVersion(value.byteValue());});
+		// Map mode
+		panel.addOptionList("Map mode", MapMode.values(), MapMode.loRom, (value) -> {setMapMode(value);});
+		// Game title
+		panel.addTextbox("Game title", 21, (value) -> {setGameTitle(value);});
+		// Cartridge type
+		panel.addOptionList("Cartridge Type", CartridgeType.values(), CartridgeType.ROMonly, (value) -> {setCartridgeType(value);});
+		// ROM size
+		panel.addSpinner("ROM size", 0, 0, Integer.MAX_VALUE - 1, (value) -> {setROMSize(value);});
+		// RAM size
+		panel.addSpinner("RAM size", 0, 0, Integer.MAX_VALUE - 1, (value) -> {setRAMSize(value);});
+		// Destination
+		panel.addOptionList("Destination", Destination.values(), Destination.USA, (value) -> {setDestination(value);});
+		// Revision
+		panel.addSpinner("Revision", 0, 0, 256, (value) -> {setRevision(value.byteValue());});
+
+		panel.addButton("Save", () ->
+		{
+			Desktop desktop = Desktop.getDesktop();
+			desktop.browseFileDirectory(new File(MiscUtils.getAbsolute("")));
+		});
+		return panel;
 	}
 	
 	

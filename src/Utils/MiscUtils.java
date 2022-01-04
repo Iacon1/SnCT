@@ -6,17 +6,11 @@ package Utils;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.math.RoundingMode;
-
 public final class MiscUtils
 {
 	private static <C> void addItemsToFit(ArrayList<C> array, int newSize)
