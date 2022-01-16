@@ -1,16 +1,26 @@
+package Misc;
 import java.util.LinkedList;
 
+import Segments.Header;
 import Segments.Segment;
+import Utils.Editable;
+import Utils.EditorPanel;
 import Utils.MiscUtils;
 
 // By Iacon1
 // Created 10/24/2021
 // Builds the config file
 
-public class ConfigBuilder
+public class ConfigBuilder implements Editable
 {
 	private int banks = 0; // Number of extra banks
 	private LinkedList<Segment> segments; // User-defined segments
+	
+	public ConfigBuilder()
+	{
+		segments = new LinkedList<Segment>();
+		segments.add(new Header());
+	}
 	
 	public void setBanks(int banks)
 	{
@@ -72,5 +82,35 @@ public class ConfigBuilder
 				;
 		
 		return text;
+	}
+	@Override
+	public String getName() {return "Configuration Builder";}
+	
+	private Segment selectedSegment;
+	@Override
+	public EditorPanel editorPanel()
+	{
+		EditorPanel panel = new EditorPanel(getName());
+		panel.addSpinner("Banks", 0, 0, 255, (value) -> {banks = value;});
+
+		EditorPanel.TreetUpdateHandle updateHandle = panel.addTree("Segments", (selected) -> {
+			if (selected != null) selectedSegment = (Segment) selected;
+			else selectedSegment = null;
+			}, segments.toArray());
+		
+		panel.addButton("Remove segment", () -> {
+			if (selectedSegment != null && selectedSegment.removable())
+			{
+				segments.remove(selectedSegment);
+				updateHandle.update(segments.toArray());
+			}
+			selectedSegment = null;
+		});
+		panel.addButton("Save", () ->
+		{
+			String path = MiscUtils.askPath();
+			MiscUtils.saveText(path, build());
+		});
+		return panel;
 	}
 }

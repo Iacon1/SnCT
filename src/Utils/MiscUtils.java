@@ -4,6 +4,7 @@
 
 package Utils;
 
+import java.awt.FileDialog;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
@@ -11,6 +12,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+
+import javax.swing.JFrame;
 public final class MiscUtils
 {
 	private static <C> void addItemsToFit(ArrayList<C> array, int newSize)
@@ -143,5 +146,14 @@ public final class MiscUtils
 	public static double logBase(double a, double b)
 	{
 		return Math.log(a) / Math.log(b);
+	}
+	
+	public static String askPath()
+	{
+		FileDialog fd = new FileDialog(new JFrame());
+		fd.setVisible(true);
+		File[] f = fd.getFiles();
+		if (f.length > 0) return f[0].getPath();
+		else return null;
 	}
 }

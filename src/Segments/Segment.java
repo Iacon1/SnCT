@@ -4,7 +4,9 @@
 
 package Segments;
 
-public interface Segment
+import Utils.Editable;
+
+public interface Segment extends Editable
 {
 	// Gets offset
 	public int getOffset();
@@ -31,4 +33,7 @@ public interface Segment
 	 * 
 	 */
 	public String buildConfig();
+	
+	public boolean editable();
+	public boolean removable();
 }

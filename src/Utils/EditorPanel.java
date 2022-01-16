@@ -15,24 +15,21 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JList;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
 
 import javax.swing.JLabel;
 import java.awt.GridLayout;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collection;
 
-import javax.swing.border.BevelBorder;
-import javax.swing.BoxLayout;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-
 
 @SuppressWarnings("serial")
 public class EditorPanel extends JPanel
@@ -143,20 +140,131 @@ public class EditorPanel extends JPanel
 		
 		addControlRow(button1, button2);
 	}
+	
+	private static class EditableNode extends DefaultMutableTreeNode
+	{
+		private Editable editable;
+		
+		public EditableNode(String label, Editable editable)
+		{
+			super(label);
+			this.editable = editable;
+		}
+		
+		public EditorPanel editorPanel()
+		{
+			return editable.editorPanel();
+		}
+		
+		public Editable getEditable()
+		{
+			return editable;
+		}
+		
+	}
+	private MutableTreeNode getNode(String label, Object[] objects)
+	{
+		DefaultMutableTreeNode node = new DefaultMutableTreeNode(label);
+		for (int i = 0; i < objects.length; ++i)
+		{
+			if (objects[i] == null) continue;
+			else if (Object[].class.isAssignableFrom(objects[i].getClass())) // Itself an array
+			{
+				node.add(getNode(objects[i].getClass().getName(), (Object[]) objects[i]));
+			}
+			else if (Editable.class.isAssignableFrom(objects[i].getClass())) // An editable
+			{
+				Editable editable = (Editable) objects[i];
+				node.add(getNode(editable.getName(), editable));
+			}
+			else continue;
+		}
+		
+		return node;
+	}
+	private MutableTreeNode getNode(String label, Editable editable)
+	{
+		EditableNode node = new EditableNode(label, editable);
+		return node;
+	}
+	public static interface TreetUpdateHandle {public void update(Object... objects);}
+	
+	/** Adds a hierarchical list.
+	 * 
+	 *  @return An update handle.
+	 */
+	public TreetUpdateHandle addTree(String label, EditFunction<Object> selectFunction, Object... objects)
+	{
+		JTree tree = new JTree();
+		MutableTreeNode rootNode = getNode(label, objects);
+		DefaultTreeModel model = new DefaultTreeModel(rootNode);
+		tree.setModel(model);
+		
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.setLeftComponent(tree);
+		splitPane.setDividerLocation(0.5);
+		
+		tree.addTreeSelectionListener(e -> {
+			Object node = tree.getLastSelectedPathComponent();
+			if (node == null) return;
+			if (node.getClass() == EditableNode.class)
+			{
+				EditorPanel editorPanel = ((EditableNode) node).editorPanel();
+				splitPane.setRightComponent(editorPanel);
+				splitPane.setDividerLocation(0.5);
+				splitPane.setResizeWeight(0.5);
+				selectFunction.onEdit(((EditableNode) node).getEditable());
+			}
+			else if (node == rootNode)
+			{
+				splitPane.setRightComponent(null);
+				splitPane.setDividerLocation(1.0);
+				splitPane.setResizeWeight(1.0);
+			}
+			updateInfo();
+		});
+		addControlRow(new JLabel(label), splitPane);
+		
+		return o -> 
+		{
+			MutableTreeNode rN = getNode(label, o);
+			DefaultTreeModel m = new DefaultTreeModel(rN);
+			tree.setModel(m);
+			tree.updateUI();
+		};
+	}
+	
+	private class LimitedLengthDocument extends PlainDocument
+	{
+		private int maxLength;
+		
+		public LimitedLengthDocument(int maxLength)
+		{
+			super();
+			this.maxLength = maxLength;
+		}
+		@Override
+		public void insertString(int offset, String str, AttributeSet a) throws BadLocationException
+		{
+			if (str != null && (getLength() + str.length() <= maxLength)) super.insertString(offset, str, a);
+		}
+	}
 	public void addTextbox(String label, int maxLength, EditFunction<String> editFunction)
 	{
+		LimitedLengthDocument document = new LimitedLengthDocument(maxLength);
+		
 		JTextField box = new JTextField();
-		box.addActionListener((e) -> 
+		box.setDocument(document);
+		
+		
+		box.getDocument().addDocumentListener(new DocumentListener()
 		{
-			String text = box.getText();
-			if (text.length() > maxLength)
-			{
-				text = text.substring(0, maxLength);
-				box.setText(text);
-			}
-			editFunction.onEdit(text);
+			public void changedUpdate(DocumentEvent e) {editFunction.onEdit(box.getText());}
+			public void removeUpdate(DocumentEvent e) {editFunction.onEdit(box.getText());}
+			public void insertUpdate(DocumentEvent e) {editFunction.onEdit(box.getText());}
 		});
-	
+
 		addControlRow(new JLabel(label), box);
 	}
 	

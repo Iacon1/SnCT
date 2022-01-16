@@ -287,11 +287,13 @@ public class Header implements Segment, Editable
 
 		panel.addButton("Save", () ->
 		{
-			Desktop desktop = Desktop.getDesktop();
-			desktop.browseFileDirectory(new File(MiscUtils.getAbsolute("")));
+			String path = MiscUtils.askPath();
+			MiscUtils.saveText(path, buildAssembly());
 		});
 		return panel;
 	}
-	
-	
+	@Override
+	public boolean editable() {return true;}
+	@Override
+	public boolean removable() {return false;}
 }
