@@ -6,15 +6,13 @@
 
 package Segments;
 
-import java.awt.Desktop;
-import java.io.File;
 import java.util.List;
 
 import Utils.Editable;
 import Utils.EditorPanel;
 import Utils.MiscUtils;
 
-public class Header implements Segment, Editable
+public class Header implements Segment
 {
 	public enum CartridgeType
 	{
@@ -185,22 +183,25 @@ public class Header implements Segment, Editable
 	}
 	
 	@Override
-	public int getOffset() {
+	public int getOffset()
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}
 	@Override
-	public void setOffset(int offset) {
+	public void setOffset(int offset)
+	{
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public int size()
+	public int getSize()
 	{
 		return 47;
 	}
-
+	@Override
+	public void setSize(int size) {}
 	@Override
 	public String getTitle()
 	{
@@ -256,12 +257,11 @@ public class Header implements Segment, Editable
 		return text;
 	}
 	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getName()
+	{
+		return "Header";
 	}
-	@Override
-	public EditorPanel editorPanel()
+	public EditorPanel headerEditorPanel()
 	{
 		EditorPanel panel = new EditorPanel("Header Editor");
 		// Maker code
@@ -277,9 +277,9 @@ public class Header implements Segment, Editable
 		// Cartridge type
 		panel.addOptionList("Cartridge Type", CartridgeType.values(), CartridgeType.ROMonly, (value) -> {setCartridgeType(value);});
 		// ROM size
-		panel.addSpinner("ROM size", 0, 0, Integer.MAX_VALUE - 1, (value) -> {setROMSize(value);});
+		panel.addSpinner("ROM size", 0, 0, Integer.MAX_VALUE, (value) -> {setROMSize(value);});
 		// RAM size
-		panel.addSpinner("RAM size", 0, 0, Integer.MAX_VALUE - 1, (value) -> {setRAMSize(value);});
+		panel.addSpinner("RAM size", 0, 0, Integer.MAX_VALUE, (value) -> {setRAMSize(value);});
 		// Destination
 		panel.addOptionList("Destination", Destination.values(), Destination.USA, (value) -> {setDestination(value);});
 		// Revision
@@ -292,8 +292,15 @@ public class Header implements Segment, Editable
 		});
 		return panel;
 	}
+	
 	@Override
-	public boolean editable() {return true;}
+	public EditorPanel editorPanel()
+	{
+		EditorPanel panel = new EditorPanel("Header");
+		panel.addLabel("Offset (B)", Integer.toString(getOffset()));
+		panel.addLabel("Size (B)", Integer.toString(getSize()));
+		return panel;
+	}
 	@Override
 	public boolean removable() {return false;}
 }

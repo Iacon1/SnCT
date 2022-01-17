@@ -5,6 +5,7 @@
 package Segments;
 
 import Utils.Editable;
+import Utils.EditorPanel;
 
 public interface Segment extends Editable
 {
@@ -17,7 +18,9 @@ public interface Segment extends Editable
 	 * 
 	 * @return estimated size in bytes once compiled.
 	 */
-	public int size();
+	public int getSize();
+	
+	public void setSize(int size);
 	
 	/** Returns the title of the segment
 	 * 
@@ -34,6 +37,5 @@ public interface Segment extends Editable
 	 */
 	public String buildConfig();
 	
-	public boolean editable();
 	public boolean removable();
 }

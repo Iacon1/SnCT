@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 import Misc.ConfigBuilder;
 import Segments.Header;
@@ -41,7 +42,7 @@ public class Menu extends JFrame {
 	public void addPanes()
 	{
 		contentPane.add(new ConfigBuilder().editorPanel());
-		contentPane.add(new Header().editorPanel());
+		contentPane.add(new Header().headerEditorPanel());
 	}
 	
 	/**
@@ -49,8 +50,8 @@ public class Menu extends JFrame {
 	 */
 	public Menu()
 	{
-		ConfigBuilder builder = new ConfigBuilder();
 		this.setTitle(MiscUtils.getProgramName());
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(640, 480));
 		
 		contentPane = new JTabbedPane();

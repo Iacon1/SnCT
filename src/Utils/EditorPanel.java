@@ -268,17 +268,28 @@ public class EditorPanel extends JPanel
 		addControlRow(new JLabel(label), box);
 	}
 	
-	public void setTitle(String title) {titleLabel.setText(title);}
+	public static interface labelUpdateHandle {public void update(String text);}
+	public labelUpdateHandle addLabel(String name, String text)
+	{
+		JLabel textLabel = new JLabel(text);
+		addControlRow(new JLabel(name), textLabel);
+		
+		return (textValue) -> {textLabel.setText(textValue);};
+	}
+	
+	public void setTitle(String title) {setName(title); titleLabel.setText(title);}
 	
 	/**
 	 * Create the panel.
 	 */
 	public EditorPanel(String title)
 	{
+		
 		setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		setLayout(new BorderLayout(0, 0));
 		
 		titleLabel = new JLabel(title);
+		setTitle(title);
 		add(titleLabel, BorderLayout.NORTH);
 		
 		controlsPanel = new JPanel();
