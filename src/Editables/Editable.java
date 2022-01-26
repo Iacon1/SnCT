@@ -2,7 +2,7 @@
 // Created 12/06/2021
 // Something that has an editor panel
 
-package Utils;
+package Editables;
 
 public interface Editable
 {

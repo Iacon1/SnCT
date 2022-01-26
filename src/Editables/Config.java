@@ -1,40 +1,20 @@
-package Misc;
-import java.util.LinkedList;
+package Editables;
 
-import Segments.Header;
-import Segments.Segment;
-import Utils.Editable;
-import Utils.EditorPanel;
 import Utils.MiscUtils;
 
 // By Iacon1
 // Created 10/24/2021
 // Builds the config file
 
-public class ConfigBuilder implements Editable
+public class Config implements Editable
 {
-	private int banks = 0; // Number of extra banks
-	private LinkedList<Segment> segments; // User-defined segments
-	
-	public ConfigBuilder()
-	{
-		segments = new LinkedList<Segment>();
-		segments.add(new Header());
-	}
+	private int banks = 0;
 	
 	public void setBanks(int banks)
 	{
 		this.banks = banks;
 	}
-	public void addSegment(Segment segment)
-	{
-		segments.add(segment);
-	}
-	public void removeSegment(Segment segment)
-	{
-		segments.remove(segment);
-	}
-	
+
 	/** Builds the config file
 	 * 
 	 * @return The config file, as a string.
@@ -65,14 +45,11 @@ public class ConfigBuilder implements Editable
 				+ "{ \n"
 				+ "  ZEROPAGE: load = ZEROPAGE, type = zp; \n"
 				+ "  BSS:      load = BSS,      type = bss,    align = $100; \n"
+				+ "  CODE:     load = ROM,      align = $8000; \n"
+				+ "  HEADER:   LOAD = ROM,      start = $FFB0; \n"
+				+ "  VECTORS:  LOAD = ROM,      align = $FFE0; \n"
 				+ "\n";
-		
-		for (int i = 0; i < segments.size(); ++i)
-			text = text + segments.get(i).buildConfig();
-		
-		text = text
-				+ "\n"
-				;
+
 		for (int i = 1; i <= banks; ++i) // Populates banks
 			text = text
 				+ "  BANK" + MiscUtils.asHex((byte) i, 1) + ":    load = BANK" + MiscUtils.asHex((byte) i, 1) + ",    align = $8000, optional = yes; \n"
@@ -84,28 +61,13 @@ public class ConfigBuilder implements Editable
 		return text;
 	}
 	@Override
-	public String getName() {return "Configuration Builder";}
-	
-	private Segment selectedSegment;
+	public String getName() {return "Configuration";}
+
 	@Override
 	public EditorPanel editorPanel()
 	{
 		EditorPanel panel = new EditorPanel(getName());
 		panel.addSpinner("Banks", 0, 0, 255, (value) -> {banks = value;});
-
-		EditorPanel.TreetUpdateHandle updateHandle = panel.addTree("Segments", (selected) -> {
-			if (selected != null) selectedSegment = (Segment) selected;
-			else selectedSegment = null;
-			}, segments.toArray());
-		
-		panel.addButton("Remove segment", () -> {
-			if (selectedSegment != null && selectedSegment.removable())
-			{
-				segments.remove(selectedSegment);
-				updateHandle.update(segments.toArray());
-			}
-			selectedSegment = null;
-		});
 		panel.addButton("Save", () ->
 		{
 			String path = MiscUtils.askPath();

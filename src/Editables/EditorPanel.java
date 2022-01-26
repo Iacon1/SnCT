@@ -1,6 +1,6 @@
 // Simple menu for editing things in the editor.
 
-package Utils;
+package Editables;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -11,6 +11,7 @@ import javax.swing.JTree;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JList;
@@ -18,6 +19,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JLabel;
 import java.awt.GridLayout;
+import java.text.ParseException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -26,10 +28,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.MaskFormatter;
 import javax.swing.text.PlainDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+
+import Utils.Logging;
 
 @SuppressWarnings("serial")
 public class EditorPanel extends JPanel
@@ -235,28 +240,12 @@ public class EditorPanel extends JPanel
 		};
 	}
 	
-	private class LimitedLengthDocument extends PlainDocument
-	{
-		private int maxLength;
-		
-		public LimitedLengthDocument(int maxLength)
-		{
-			super();
-			this.maxLength = maxLength;
-		}
-		@Override
-		public void insertString(int offset, String str, AttributeSet a) throws BadLocationException
-		{
-			if (str != null && (getLength() + str.length() <= maxLength)) super.insertString(offset, str, a);
-		}
-	}
 	public void addTextbox(String label, int maxLength, EditFunction<String> editFunction)
 	{
-		LimitedLengthDocument document = new LimitedLengthDocument(maxLength);
-		
-		JTextField box = new JTextField();
-		box.setDocument(document);
-		
+		MaskFormatter mask = null;
+		try {mask = new MaskFormatter("*".repeat(maxLength));}
+		catch (Exception e) {Logging.logException(e); return;}
+		JTextField box = new JFormattedTextField(mask);
 		
 		box.getDocument().addDocumentListener(new DocumentListener()
 		{

@@ -16,6 +16,7 @@ import java.util.Scanner;
 import javax.swing.JFrame;
 public final class MiscUtils
 {
+	
 	private static <C> void addItemsToFit(ArrayList<C> array, int newSize)
 	{
 		while (array.size() < newSize)
@@ -133,14 +134,22 @@ public final class MiscUtils
 		return Math.max(x, y);
 	}
 	
-	public static String asHex(byte number, int digits)
+	public static String asHex(int number, int digits)
 	{
-		return String.format("%0" + digits + "x", number);
+		return String.format("%0" + digits + "x", number).substring(0, digits);
 	}
 	
 	public static String asHex(byte number)
 	{
 		return asHex(number, 2);
+	}
+	
+	public static String asBinary(int number, int digits)
+	{
+		String binaryText = Integer.toBinaryString(number);
+		int missingZeroes = digits - binaryText.length();
+		if (missingZeroes > 0) return "0".repeat(missingZeroes) + binaryText;
+		else return binaryText.substring(binaryText.length() - digits, binaryText.length());
 	}
 	
 	public static double logBase(double a, double b)

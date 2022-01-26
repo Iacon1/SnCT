@@ -9,8 +9,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import Misc.ConfigBuilder;
-import Segments.Header;
+import Editables.Config;
+import Editables.Header;
+import Editables.Image;
 import Utils.DebugLogger;
 import Utils.Logging;
 import Utils.MiscUtils;
@@ -41,8 +42,9 @@ public class Menu extends JFrame {
 
 	public void addPanes()
 	{
-		contentPane.add(new ConfigBuilder().editorPanel());
-		contentPane.add(new Header().headerEditorPanel());
+		contentPane.add(new Config().editorPanel());
+		contentPane.add(new Header().editorPanel());
+		contentPane.add(new Image().editorPanel());
 	}
 	
 	/**

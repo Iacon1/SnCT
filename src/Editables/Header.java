@@ -4,15 +4,22 @@
 // https://sneslab.net/wiki/SNES_ROM_Header
 // Cartridge types and such not exclusive, just common ones right now
 
-package Segments;
+package Editables;
 
 import java.util.List;
 
-import Utils.Editable;
-import Utils.EditorPanel;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
+
+import Editables.EditorPanel.EditFunction;
+import Utils.Logging;
 import Utils.MiscUtils;
 
-public class Header implements Segment
+public class Header implements Editable
 {
 	public enum CartridgeType
 	{
@@ -160,9 +167,17 @@ public class Header implements Segment
 	{
 		this.ROMSize = (byte) (int) Math.ceil(MiscUtils.logBase(ROMSize / 1024, 2));
 	}
+	public int getROMSize() // In bytes
+	{
+		return 1024 * (int)  Math.pow(2, (int) ROMSize);
+	}
 	public void setRAMSize(int RAMSize) // In bytes
 	{
 		this.RAMSize = (byte) (int) Math.ceil(MiscUtils.logBase(RAMSize / 1024, 2));
+	}
+	public int getRAMSize() // In bytes
+	{
+		return 1024 * (int) Math.pow(2, (int) RAMSize);
 	}
 	public void setDestination(Destination destination)
 	{
@@ -181,38 +196,6 @@ public class Header implements Segment
 		checksum[0] = (byte) ((sum >> 8) & 0xFF);
 		checksum[1] = (byte) (sum & 0xFF);
 	}
-	
-	@Override
-	public int getOffset()
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public void setOffset(int offset)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public int getSize()
-	{
-		return 47;
-	}
-	@Override
-	public void setSize(int size) {}
-	@Override
-	public String getTitle()
-	{
-		return "HEADER";
-	}
-	
-	@Override
-	public String getSummary()
-	{
-		return "ROM Header";
-	}
 
 	public String buildAssembly() 
 	{
@@ -220,50 +203,33 @@ public class Header implements Segment
 		
 		String text = null;
 		
-		
 		text = ""
-				+ ".segment \"" + getTitle() + "\" ; " + getSummary() + "\n"
-				+ ".ascii \"" + new String(makerCode) + "\" ; Maker Code \n" // $00:FFB0-$00:FFB1 Maker Code
-				+ ".ascii \"" + new String(gameCode) +  "\" ; Game Code \n" // $00:FFB2-$00:FFB5 Game Code
-				+ ".byte $00, $00, $00, $00, $00, $00, $00 ; Fixed Value \n" // $00:FFB6-$00:FFBC Fixed Value (0x00)
-				+ ".byte $" + MiscUtils.asHex(expansionRAMSize) + " ; Expansion RAM Size \n" // $00:FFBD-$00:FFBD Expansion RAM Size
-				+ ".byte $" + MiscUtils.asHex(specialVersion) + " ; Special Version \n" // $00:FFBE-$00:FFBE Special Version
-				+ ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type subnumber \n" // $00:FFBF-$00:FFBF Cartridge Type (Sub-number) TODO not documented???
-				+ ".ascii \"" + new String(gameTitle) + "\" ; Game Title \n" // $00:FFC0-$00:FFD4 Game Title Registration TODO JIS X 0201 support
-				+ ".byte $" + MiscUtils.asHex(mapMode.getCode()) + " ; Map Mode \n" // $00:FFD5-$00:FFD5 Map Mode
-				+ ".byte $" + MiscUtils.asHex(cartridgeType.getCode()) + " ; Cartridge Type \n" // $00:FFD6-$00:FFD6 Cartridge Type
-				+ ".byte $" + MiscUtils.asHex(ROMSize) + " ; ROM Size \n" // $00:FFD7-$00:FFD7 ROM Size
-				+ ".byte $" + MiscUtils.asHex(RAMSize) + " ; RAM Size \n" // $00:FFD8-$00:FFD8 RAM Size
-				+ ".byte $" + MiscUtils.asHex(destination.getCode()) + " ; Destination Code \n" // $00:FFD9-$00:FFD9 Destination Code
-				+ ".byte $33 ; Fixed Value \n" // $00:FFDA-$00:FFDA Fixed Value (0x33)
-				+ ".byte $" + MiscUtils.asHex(revision) + " ; Revision \n" // $00:FFDB-$00:FFDB Mask ROM Version
-				+ ".byte $" + MiscUtils.asHex((byte) ~checksum[0]) + ", $" + MiscUtils.asHex((byte) ~checksum[1]) + " ; Complement Check \n" // $00:FFDC-$00:FFDD Complement Check
-				+ ".byte $" + MiscUtils.asHex((byte) checksum[0]) + ", $" + MiscUtils.asHex((byte) checksum[1]) + " ; Checksum \n" // $00:FFDE-$00:FFDF Checksum
+				+ ".segment \"HEADER\" ;\tRom Header\n"
+				+ "\t.byte\t\"" + new String(makerCode) + "\"\t; Maker Code \n" // $00:FFB0-$00:FFB1 Maker Code
+				+ "\t.byte\t\"" + new String(gameCode) +  "\"\t; Game Code \n" // $00:FFB2-$00:FFB5 Game Code
+				+ "\t.byte\t$00, $00, $00, $00, $00, $00, $00\t; Fixed Value \n" // $00:FFB6-$00:FFBC Fixed Value (0x00)
+				+ "\t.byte\t$" + MiscUtils.asHex(expansionRAMSize) + "\t; Expansion RAM Size: " + "0 B" + "\n" // $00:FFBD-$00:FFBD Expansion RAM Size
+				+ "\t.byte\t$" + MiscUtils.asHex(specialVersion) + "\t; Special Version #: " + specialVersion + "\n" // $00:FFBE-$00:FFBE Special Version
+				+ "\t.byte\t$" + MiscUtils.asHex(cartridgeType.getCode()) + "\t; Cartridge Type subnumber \n" // $00:FFBF-$00:FFBF Cartridge Type (Sub-number) TODO not documented???
+				+ "\t.byte\t\"" + new String(gameTitle) + "\"\t; Game Title \n" // $00:FFC0-$00:FFD4 Game Title Registration TODO JIS X 0201 support
+				+ "\t.byte\t$" + MiscUtils.asHex(mapMode.getCode()) + "\t; Map Mode: " + mapMode.getName() + "\n" // $00:FFD5-$00:FFD5 Map Mode
+				+ "\t.byte\t$" + MiscUtils.asHex(cartridgeType.getCode()) + "\t; Cartridge Type: " + cartridgeType.getName() + "\n" // $00:FFD6-$00:FFD6 Cartridge Type
+				+ "\t.byte\t$" + MiscUtils.asHex(ROMSize) + "\t; ROM Size: " + getROMSize() + "B\n" // $00:FFD7-$00:FFD7 ROM Size
+				+ "\t.byte\t$" + MiscUtils.asHex(RAMSize) + "\t; RAM Size: " + getRAMSize() + "B\n" // $00:FFD8-$00:FFD8 RAM Size
+				+ "\t.byte\t$" + MiscUtils.asHex(destination.getCode()) + "\t; Destination: " + destination.getName() + "\n" // $00:FFD9-$00:FFD9 Destination Code
+				+ "\t.byte\t$33 ;\tFixed Value \n" // $00:FFDA-$00:FFDA Fixed Value (0x33)
+				+ "\t.byte\t$" + MiscUtils.asHex(revision) + "\t; Revision #: " + revision + "\n" // $00:FFDB-$00:FFDB Mask ROM Version
+				+ "\t.byte\t$" + MiscUtils.asHex((byte) (~checksum[0])) + ", $" + MiscUtils.asHex((byte) (~checksum[1])) + "\t; Complement Check \n" // $00:FFDC-$00:FFDD Complement Check
+				+ "\t.byte\t$" + MiscUtils.asHex((byte) checksum[0]) + ", $" + MiscUtils.asHex((byte) checksum[1]) + "\t; Checksum \n" // $00:FFDE-$00:FFDF Checksum
 				;
 		
 		return text;
 	}
 	
 	@Override
-	public String buildConfig()
+	public EditorPanel editorPanel()
 	{
-		String text = null;
-		
-		text = ""
-				+ "  " + getTitle() + ": \n"
-				+ "    load = ROM \n"
-				+ "    start = $FFB0; \n";
-		
-		return text;
-	}
-	@Override
-	public String getName()
-	{
-		return "Header";
-	}
-	public EditorPanel headerEditorPanel()
-	{
-		EditorPanel panel = new EditorPanel("Header Editor");
+		EditorPanel panel = new EditorPanel("Header");
 		// Maker code
 		panel.addTextbox("Maker code", 2, (value) -> {setMakerCode(value);});
 		// Game code
@@ -275,11 +241,11 @@ public class Header implements Segment
 		// Game title
 		panel.addTextbox("Game title", 21, (value) -> {setGameTitle(value);});
 		// Cartridge type
-		panel.addOptionList("Cartridge Type", CartridgeType.values(), CartridgeType.ROMonly, (value) -> {setCartridgeType(value);});
+		panel.addOptionList("Cartridge type", CartridgeType.values(), CartridgeType.ROMonly, (value) -> {setCartridgeType(value);});
 		// ROM size
-		panel.addSpinner("ROM size", 0, 0, Integer.MAX_VALUE, (value) -> {setROMSize(value);});
+		panel.addSpinner("ROM size (B)", 0, 0, Integer.MAX_VALUE, (value) -> {setROMSize(value);});
 		// RAM size
-		panel.addSpinner("RAM size", 0, 0, Integer.MAX_VALUE, (value) -> {setRAMSize(value);});
+		panel.addSpinner("RAM size (B)", 0, 0, Integer.MAX_VALUE, (value) -> {setRAMSize(value);});
 		// Destination
 		panel.addOptionList("Destination", Destination.values(), Destination.USA, (value) -> {setDestination(value);});
 		// Revision
@@ -292,15 +258,6 @@ public class Header implements Segment
 		});
 		return panel;
 	}
-	
 	@Override
-	public EditorPanel editorPanel()
-	{
-		EditorPanel panel = new EditorPanel("Header");
-		panel.addLabel("Offset (B)", Integer.toString(getOffset()));
-		panel.addLabel("Size (B)", Integer.toString(getSize()));
-		return panel;
-	}
-	@Override
-	public boolean removable() {return false;}
+	public String getName() {return "Header";}
 }
