@@ -49,50 +49,67 @@ public class Image implements Editable
 		MiscUtils.saveText(path, buildAssembly());
 	}
 	
+	private String tileAssembly2bpp(int[] tile, List<Integer> palette, int shift)
+	{
+		String text = "";
+	
+		for (int i = 0; i < 8; ++i)
+		{
+			String byte1 = "%";
+			String byte2 = "%";
+			
+			for (int j = 0; j < 8; ++j)
+			{
+				String indexString = Integer.toBinaryString(palette.indexOf(tile[8 * i + j] >> shift));
+				int missingLength = bpp - indexString.length();
+				if (missingLength > 0) indexString = new String("0").repeat(missingLength) + indexString;
+				
+				byte1 += indexString.substring(0, 1);
+				byte2 += indexString.substring(1, 2);
+			}
+			
+			text += "\t.byte\t" + byte1 + ", " + byte2 + "\n";
+		}
+		return text;
+	}
+	private String tileAssembly4bpp(int[] tile, List<Integer> palette)
+	{
+		return tileAssembly2bpp(tile, palette, 0) + "\n" + tileAssembly2bpp(tile, palette, 2);
+	}
+	private String tileAssembly8bpp(int[] tile, List<Integer> palette)
+	{
+		String text = "";
+	
+		for (int i = 0; i < 8; ++i)
+		{	
+			text += "\t.byte\t";
+			
+			for (int j = 0; j < 8; ++j)
+			{
+				String indexString = Integer.toBinaryString(palette.indexOf(tile[8 * i + j]));
+				int missingLength = bpp - indexString.length();
+				if (missingLength > 0) indexString = new String("0").repeat(missingLength) + indexString;
+				
+				if (j == 0) text += "%" + indexString;
+				else text += ", %" + indexString;
+			}
+			
+			text += "\n";
+		}
+		return text;
+	}
+	
 	public String tileAssembly(int x, int y, List<Integer> palette)
 	{
 		int[] tile = image.getRGB(x, y, 8, 8, null, 0, 8);
-	
-		String[] planes = new String[bpp];
-		
-		for (int i = 0; i < bpp; ++i) planes[i] = "";
-		
-		if (bpp == 1 || bpp == 2 || bpp == 4)
+
+		switch  (bpp)
 		{
-			for (int i = 0; i < 8; ++i)
-			{
-				for (int j = 0; j < bpp; ++j)
-				{
-					planes[j] += "\t.byte %";
-				}
-			
-				for (int j = 0; j < 8; ++j)
-				{
-					String indexString = Integer.toBinaryString(palette.indexOf(tile[8 * i + j]));
-					int missingLength = bpp - indexString.length();
-					indexString = new String("0").repeat(missingLength) + indexString;
-					for (int k = 0; k < bpp; ++k)
-						planes[k] += indexString.substring(bpp - k - 1, bpp - k);
-				}
-				
-				for (int j = 0; j < bpp; ++j)
-				{
-					planes[j] += "\n";
-				}
-			}
-			
-			String text = planes[0];
-			for (int i = 1; i < bpp; ++i) text += planes[i];
-			return text;
+		case 2: return tileAssembly2bpp(tile, palette, 0);
+		case 4: return tileAssembly4bpp(tile, palette);
+		case 8: return tileAssembly8bpp(tile, palette);
+		default: return tileAssembly4bpp(tile, palette);
 		}
-		else if (bpp == 8)
-		{
-			String text = "";
-			for (int i = 0; i < 8 * 8; ++i)
-				text += "\t.byte %" + Integer.toBinaryString(palette.indexOf(tile[i])) + "\n";
-			return text;
-		}
-		else return null;
 	}
 	public String paletteAssembly(List<Integer> palette)
 	{
@@ -118,15 +135,15 @@ public class Image implements Editable
 		for (int i = 0; i < image.getWidth(); i += 8)
 			for (int j = 0; j < image.getHeight(); j += 8)
 				text += tileAssembly(i, j, palette) + "\n";
-		text += "; Palette\n";
-		text += paletteAssembly(palette);
+//		text += "; Palette\n";
+//		text += paletteAssembly(palette);
 		return text;
 	}
 	@Override
 	public EditorPanel editorPanel()
 	{
 		EditorPanel panel = new EditorPanel("Graphics");
-		panel.addSpinner("BPP", 1, 1, 8, (value) -> {setBPP(value);});
+		panel.addSpinner("BPP", 2, 2, 8, (value) -> {setBPP(value);});
 		panel.addButton("Load image", () -> {String path = MiscUtils.askPath(); loadImage(path);});
 		panel.addButton("Save Image", () -> {String path = MiscUtils.askPath(); saveImage(path);});
 		return panel;

@@ -33,17 +33,17 @@ public class Vectors implements Editable
 		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
 		panel.addTextbox("On COP (Emulation)", maxLength, (value) -> {emulationCOP = value;});
 
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
+		panel.addTextbox("On BRK (Native)", maxLength, (value) -> {nativeBRK = value;});
+		panel.addTextbox("On BRK (Emulation)", maxLength, (value) -> {emulationBRK = value;});
 		
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
+		panel.addTextbox("On ABORT (Native)", maxLength, (value) -> {nativeABORT = value;});
+		panel.addTextbox("On ABORT (Emulation)", maxLength, (value) -> {emulationABORT = value;});
 		
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
+		panel.addTextbox("On NMI (Native)", maxLength, (value) -> {nativeNMI = value;});
+		panel.addTextbox("On NMI (Emulation)", maxLength, (value) -> {emulationNMI = value;});
 		
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
-		panel.addTextbox("On COP (Native)", maxLength, (value) -> {nativeCOP = value;});
+		panel.addTextbox("On RST (Native)", maxLength, (value) -> {nativeRST = value;});
+		panel.addTextbox("On RST (Emulation)", maxLength, (value) -> {emulationRST = value;});
 		
 		return panel;
 	}
